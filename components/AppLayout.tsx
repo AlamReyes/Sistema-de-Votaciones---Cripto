@@ -1,6 +1,10 @@
+// components/AppLayout.tsx
 "use client";
 
 import React, { useState } from 'react';
+// 1. Importa los hooks de navegación de Next.js
+import { useRouter, usePathname } from 'next/navigation';
+
 import {
   HomeOutlined,
   SafetyOutlined,
@@ -11,15 +15,31 @@ import { Layout, Menu, Breadcrumb, theme, type MenuProps } from 'antd';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-// --- Array para el Menú ---
+// 2. Cambia los 'key' para que sean las RUTAS (paths)
 const menuItems: MenuProps['items'] = [
-  { key: '1', icon: <HomeOutlined />, label: 'Dashboard' },
-  { key: '2', icon: <SafetyOutlined />, label: 'Votaciones' },
-  { key: '3', icon: <BarChartOutlined />, label: 'Resultados' },
-  { key: '4', icon: <UserOutlined />, label: 'Perfil' },
+  {
+    key: '/', // Ruta para el Dashboard
+    icon: <HomeOutlined />,
+    label: 'Dashboard',
+  },
+  {
+    key: '/votaciones', // Ruta para Votaciones
+    icon: <SafetyOutlined />,
+    label: 'Votaciones',
+  },
+  {
+    key: '/resultados', // Ruta para Resultados
+    icon: <BarChartOutlined />,
+    label: 'Resultados',
+  },
+  {
+    key: '/perfil', // Ruta para Perfil
+    icon: <UserOutlined />,
+    label: 'Perfil',
+  },
 ];
 
-// --- Array para el Breadcrumb ---
+// (El array de breadcrumb sigue igual por ahora)
 const breadcrumbItems = [
   { title: 'App' },
   { title: 'Dashboard' },
@@ -35,22 +55,35 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  // 3. Inicializa los hooks
+  const router = useRouter(); // Hook para cambiar de página
+  const pathname = usePathname(); // Hook para leer la ruta actual
+
+  // 4. Crea la función que maneja el clic en el menú
+  const onClickMenu: MenuProps['onClick'] = (e) => {
+    // 'e.key' contendrá la ruta (ej. '/votaciones')
+    router.push(e.key); 
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="demo-logo-vertical" style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }} />
+        
+        {/* 5. Conecta el Menú */}
         <Menu
           theme="dark"
-          defaultSelectedKeys={['1']}
           mode="inline"
           items={menuItems}
+          onClick={onClickMenu} // <-- Llama a nuestra función al hacer clic
+          selectedKeys={[pathname]} // <-- Resalta el ítem basado en la ruta actual
         />
+
       </Sider>
 
       <Layout>
         <Header style={{ padding: '0 16px', background: colorBgContainer }} />
 
-        {/* --- CONTENIDO --- */}
         <Content style={{ margin: '0 16px' }}>
           
           <Breadcrumb
@@ -58,7 +91,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             items={breadcrumbItems}
           />
           
-          {/* Aquí es donde se renderizará el contenido de app/page.tsx */}
           <div
             style={{
               padding: 24,
@@ -67,12 +99,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               borderRadius: borderRadiusLG,
             }}
           >
-            {/* Esta línea es la que dibuja el contenido de la página */}
-            {children} 
-            
+            {children}
           </div>
         </Content>
-        {/* --- FIN DEL CONTENIDO --- */}
 
         <Footer style={{ textAlign: 'center' }}>
           Sistema de Votaciones ©{new Date().getFullYear()} Creado con Ant Design
