@@ -4,7 +4,7 @@
 // (Necesario porque usaremos useState para cambiar entre vistas)
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, Divider } from 'antd';
 import { UserOutlined, LockOutlined, IdcardOutlined } from '@ant-design/icons';
 
@@ -41,12 +41,12 @@ export default function Home() {
     // Contenedor para centrar la tarjeta de login
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh'}}>
       
-      <Card style={{ width: 450, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+      <Card style={{ width: 500, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '15px' }}>
         <Title level={2} style={{ textAlign: 'center' }}>
           Sistema de Votaciones
         </Title>
         <Text style={{ display: 'block', textAlign: 'center', marginBottom: 24, color: '#8c8c8c' }}>
-          Integrantes: Alam Reyes, Erick Juárez, Michelle Benítez, Pilar Hernández, Luis García, Ricardo Romero
+          Alam Reyes, Erick Juárez, Michelle Benítez, Pilar Hernández, Luis García, Ricardo Romero
         </Text>
         
         <Divider />
@@ -54,7 +54,7 @@ export default function Home() {
         {/* --- VISTA DE LOGIN --- */}
         {view === 'login' ? (
           <>
-            <Title level={4} style={{ textAlign: 'center', marginBottom: 20 }}>Iniciar Sesión</Title>
+            <Title level={3} style={{ textAlign: 'center', marginBottom: 20 }}>Iniciar Sesión</Title>
             <Form
               name="login_form"
               onFinish={onFinishLogin}
@@ -63,7 +63,7 @@ export default function Home() {
               <Form.Item
                 label="Usuario"
                 name="username"
-                rules={[{ required: true, message: '¡Por favor ingresa tu usuario!' }]}
+                rules={[{ required: true, message: 'El usuario es requerido' }]}
               >
                 <Input prefix={<UserOutlined />} placeholder="Tu usuario" />
               </Form.Item>
@@ -71,13 +71,13 @@ export default function Home() {
               <Form.Item
                 label="Contraseña"
                 name="password"
-                rules={[{ required: true, message: '¡Por favor ingresa tu contraseña!' }]}
+                rules={[{ required: true, message: 'La contraseña es requerida' }]}
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Tu contraseña" />
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block style={{marginTop: '1rem', marginBottom: '1rem'}}>
                   Entrar
                 </Button>
               </Form.Item>
@@ -91,7 +91,7 @@ export default function Home() {
         /* --- VISTA DE REGISTRO --- */
         ) : (
           <>
-            <Title level={4} style={{ textAlign: 'center', marginBottom: 20 }}>Crear Cuenta</Title>
+            <Title level={3} style={{ textAlign: 'center', marginBottom: 20 }}>Crear Cuenta</Title>
             <Form
               name="register_form"
               onFinish={onFinishRegister}
@@ -130,7 +130,7 @@ export default function Home() {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block style={{ marginTop: '1rem', marginBottom: '1rem' }}>
                   Registrarme
                 </Button>
               </Form.Item>
