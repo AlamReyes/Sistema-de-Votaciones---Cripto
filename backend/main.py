@@ -1,7 +1,6 @@
 from fastapi import FastAPI
+from core.config import settings
+from api.v1.routes import router as api_router
 
-app = FastAPI()
-
-@app.get("/")
-def read_root():
-    return {"message": "API de votaciones activa"}
+app = FastAPI(title=settings.PROJECT_NAME)
+app.include_router(api_router, prefix=settings.API_V1_STR)
