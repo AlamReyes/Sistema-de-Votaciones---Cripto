@@ -18,7 +18,7 @@ const { Header, Content, Footer, Sider } = Layout;
 // 2. Cambia los 'key' para que sean las RUTAS (paths)
 const menuItems: MenuProps['items'] = [
   {
-    key: '/', // Ruta para el Dashboard
+    key: '/dashboard', // Ruta para el Dashboard
     icon: <HomeOutlined />,
     label: 'Dashboard',
   },

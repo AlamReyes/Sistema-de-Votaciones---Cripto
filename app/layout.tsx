@@ -1,14 +1,12 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 
-// Importa el CSS de Ant Design
+// Importa el CSS de Ant Design (¡esto se queda!)
 import 'antd/dist/reset.css';
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// Importa tu Layout personalizado
-import { AppLayout } from '@/components/AppLayout';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,13 +33,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* ¡AQUÍ ESTÁ LA CORRECCIÓN!
-          Envolvemos los {children} (tus páginas) con el AppLayout 
-          para que el menú lateral y el header aparezcan en todos lados.
+        {/*
+          Aquí solo renderizamos {children} directamente.
+          - Si es la página de Login, {children} es el login.
+          - Si es /dashboard, {children} es el layout de (app) + la página de dashboard.
         */}
-        <AppLayout>
-          {children}
-        </AppLayout>
+        {children}
       </body>
     </html>
   );
