@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models.user import User
 from db.repositories.base import BaseRepository
 
-
 class UserRepository(BaseRepository[User]):
     def __init__(self, db: AsyncSession):
         super().__init__(User, db)
@@ -34,13 +33,13 @@ class UserRepository(BaseRepository[User]):
         return result.scalar_one_or_none() is not None
     
     async def create_user(self, username: str, password_hash: str, 
-                         public_key: str) -> User:
-        """Crear nuevo usuario"""
+                         public_key: str, is_admin: bool = False) -> User:
         if await self.username_exists(username):
             raise ValueError(f"Username '{username}' ya existe")
         
         return await self.create(
             username=username,
             password_hash=password_hash,
-            public_key=public_key
+            public_key=public_key,
+            is_admin=is_admin 
         )

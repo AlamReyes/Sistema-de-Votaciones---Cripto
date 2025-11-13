@@ -1,4 +1,4 @@
-from sqlalchemy import String, DateTime, Integer
+from sqlalchemy import String, DateTime, Integer,  Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from db.base import Base
@@ -17,6 +17,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(64), nullable=False)  # SHA-256
     public_key: Mapped[str] = mapped_column(String, nullable=False)  # RSA PEM
+
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

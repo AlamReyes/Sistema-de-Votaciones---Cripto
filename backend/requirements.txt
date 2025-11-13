@@ -12,3 +12,4 @@ black
 isort
 mypy
 pre-commit
+cryptography==42.0.0

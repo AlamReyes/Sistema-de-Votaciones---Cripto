@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import get_db
 from db.repositories.user import UserRepository
+from crypto.voting_crypto import VotingCrypto
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -14,7 +15,7 @@ async def register_user(
 
     user = await user_repo.create_user(
         username=username,
-        password_hash = password,  # implementar función hash
+        password_hash = VotingCrypto.hash_password(password),  # implementar función hash
         public_key="mi_llave_publica"
     )
     return user
@@ -27,4 +28,4 @@ async def delete_user(id: int, session: AsyncSession = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    return {"message": "Usuario eliminado correctamente"}
+    return {"message": "Usuario eliminado correctamente"} 
