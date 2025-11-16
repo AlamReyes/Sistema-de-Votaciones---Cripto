@@ -1,5 +1,5 @@
-
-export default function AdminResultadosPage() {
+// app/resultados/page.tsx
+export default function ResultadosPage() {
   return (
     <div>
       <h1>Página de resultados</h1>
