@@ -33,7 +33,13 @@ deactivate
 pip install -r requirements.txt
 ```
 
-### 4. Correr en Docker
+### 4. Crear .env
+
+```bash
+mv env.example .env
+```
+
+### 5. Correr en Docker (desde fuera del entorno virtual)
 
 ```bash
 # Levantar el contenedor
@@ -46,7 +52,7 @@ docker compose run seed
 docker compose down -v
 ```
 
-### 5. Migraciones de alembic
+### 6. Migraciones de alembic
 
 ```bash
 alembic revision --autogenerate -m "mensaje"
@@ -60,11 +66,11 @@ Abre [http://127.0.0.1:8000](http://127.0.0.1:8000) en tu navegador para ver el 
 ```
 [Cliente manda JSON]
    ↓
-FastAPI endpoint (usa Pydantic → valida entrada)
+FastAPI endpoint (usa Pydantic `Schemas` para validar entrada)
    ↓
-Service crea objeto SQLAlchemy (usa modelo de db/models)
+Service crea objeto SQLAlchemy (usa modelo de `db/models`)
    ↓
-Se guarda en la base de datos
+Se guarda en la base de datos (usa los repositorios en `db/repositories`)
    ↓
 Se devuelve el resultado (convertido a Pydantic → JSON)
 

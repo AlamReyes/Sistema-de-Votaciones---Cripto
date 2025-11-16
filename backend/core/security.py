@@ -14,7 +14,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 def create_access_token(data: dict):
     to_encode = data.copy() # Encode la data
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire, "type": "access", "is_admin": data.is_admin}) # Actualizar con el tiempo de expiración
+    to_encode.update({"exp": expire, "type": "access", "is_admin": data.get("is_admin")}) # Actualizar con el tiempo de expiración
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM) # Crear access token
 
 

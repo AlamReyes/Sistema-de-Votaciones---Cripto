@@ -12,7 +12,7 @@ function decodeJwt(token: string) {
   }
 }
 
-export default function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   console.log(token)
   if (!token) {
