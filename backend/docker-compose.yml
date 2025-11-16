@@ -1,0 +1,40 @@
+services:
+  api:
+    build: .
+    container_name: fastapi_app
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  seed:
+    build: .
+    container_name: fastapi_seed
+    command: ["python", "seed.py"]
+    depends_on:
+      - api
+      - db
+    env_file: .env
+    restart: "no"
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
