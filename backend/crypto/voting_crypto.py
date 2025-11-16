@@ -13,7 +13,6 @@ class VotingCrypto:
     """
     Clase con métodos estáticos para operaciones criptográficas
     """
-    
     @staticmethod
     def hash_password(password: str) -> str:
         """
@@ -28,18 +27,18 @@ class VotingCrypto:
         return hashlib.sha256(password.encode('utf-8')).hexdigest()
     
     @staticmethod
-    def verify_password(password: str, hash_stored: str) -> bool:
+    def verify_password(password: str, stored_hash: str) -> bool:
         """
         Verifica que el hash de la contraseña coincida
         
         Args:
             password: Contraseña a verificar
-            hash_stored: Hash almacenado en la base de datos
+            stored_hash: Hash almacenado en la base de datos
             
         Returns:
             True si coinciden
         """
-        return VotingCrypto.hash_password(password) == hash_stored
+        return VotingCrypto.hash_password(password) == stored_hash
     
     @staticmethod
     def hash_vote(election_id: str, option_id: str, timestamp: str) -> str:

@@ -23,8 +23,7 @@ class BlindTokenRepository(BaseRepository[BlindToken]):
         )
         return result.scalar_one_or_none()
     
-    async def create_blind_token(self, user_id: int, election_id: int,
-                                blinded_token: str) -> BlindToken:
+    async def create_blind_token(self, user_id: int, election_id: int, blinded_token: str) -> BlindToken:
         """Crear token cegado"""
         return await self.create(
             user_id=user_id,

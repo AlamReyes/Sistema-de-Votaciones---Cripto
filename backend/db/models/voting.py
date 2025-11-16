@@ -1,6 +1,6 @@
 from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, UniqueConstraint, Integer
-from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
-from datetime import datetime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 from db.base import Base
 
 
@@ -9,6 +9,7 @@ class BlindToken(Base):
     Token ciego para votación anónima
     """
     __tablename__ = "blind_tokens"
+    # Un token por usuario por elección
     __table_args__ = (
         UniqueConstraint('user_id', 'election_id', name='uq_user_election_token'),
     )
@@ -16,7 +17,7 @@ class BlindToken(Base):
     # ID autoincremental
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
-    # Relaciones
+    # Foreign Keys
     user_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -36,11 +37,13 @@ class BlindToken(Base):
     
     # Control de uso
     is_used: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # Relaciones
+    # Un blind_token le pertenece a un usuario específico
     user: Mapped["User"] = relationship("User", back_populates="blind_tokens")
+    # Un blind_token le pertenece a una elección específica
     election: Mapped["Election"] = relationship("Election", back_populates="blind_tokens")
     
     def __repr__(self):
@@ -56,7 +59,7 @@ class Vote(Base):
     # ID autoincremental
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
-    # Relaciones (SIN user_id - anónimo)
+    # Foreign Keys (SIN user_id - anónimo)
     election_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("elections.id", ondelete="CASCADE"),
@@ -72,13 +75,15 @@ class Vote(Base):
     
     # Datos de seguridad
     unblinded_signature: Mapped[str] = mapped_column(Text, nullable=False)  # Firma descegada
-    vote_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    vote_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True) # Voto hasheado
     encrypted_vote: Mapped[str] = mapped_column(Text, nullable=False)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     
     # Relaciones
+    # Un voto pertenece a una elección
     election: Mapped["Election"] = relationship("Election", back_populates="votes")
+    # Un voto tiene una respuesta
     option: Mapped["Option"] = relationship("Option", back_populates="votes")
     
     def __repr__(self):
@@ -98,7 +103,7 @@ class VotingReceipt(Base):
     # ID autoincremental
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
-    # Relaciones
+    # Foreign Key
     user_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -116,10 +121,12 @@ class VotingReceipt(Base):
     receipt_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     digital_signature: Mapped[str] = mapped_column(Text, nullable=False)
     
-    voted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    voted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     
     # Relaciones
+    # Un recibo de un voto le pertenece a usuario específico
     user: Mapped["User"] = relationship("User", back_populates="voting_receipts")
+    # Un recivo de un voto pertenece a una elección específica
     election: Mapped["Election"] = relationship("Election", back_populates="voting_receipts")
     
     def __repr__(self):
