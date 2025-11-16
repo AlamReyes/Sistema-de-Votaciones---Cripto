@@ -9,16 +9,20 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/docs || exit 1"] # Verificar que api este up
+      interval: 5s
+      timeout: 5s
+      retries: 10
   seed:
     build: .
     container_name: fastapi_seed
     command: ["python", "seed.py"]
     depends_on:
-      - api
-      - db
+      api:
+        condition: service_healthy
     env_file: .env
-    restart: "no"
+    restart: "no" # Solo ejecutarlo una vez, si se cae no reiniciarlo
 
   db:
     image: postgres:16
@@ -31,7 +35,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"] # Verificar que la bd esté up
       interval: 10s
       timeout: 5s
       retries: 5
