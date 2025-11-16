@@ -10,6 +10,16 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  seed:
+    build: .
+    container_name: fastapi_seed
+    command: ["python", "seed.py"]
+    depends_on:
+      - api
+      - db
+    env_file: .env
+    restart: "no"
+
   db:
     image: postgres:16
     environment:
@@ -17,7 +27,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: appdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

@@ -6,7 +6,6 @@ from datetime import datetime
 from db.models.election import Election, Option
 from db.repositories.base import BaseRepository
 
-
 class ElectionRepository(BaseRepository[Election]):
     def __init__(self, db: AsyncSession):
         super().__init__(Election, db)

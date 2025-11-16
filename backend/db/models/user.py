@@ -1,6 +1,6 @@
 from sqlalchemy import String, DateTime, Integer,  Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from db.base import Base
 
 
@@ -14,21 +14,24 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
     # Datos básicos
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(64), nullable=False)  # SHA-256
-    public_key: Mapped[str] = mapped_column(String, nullable=False)  # RSA PEM
-
+    public_key: Mapped[str] = mapped_column(String, nullable=True)  # RSA PEM
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False)
     
     # Relaciones
+    # Un usuario tiene muchas firmas ciegas
     blind_tokens: Mapped[list["BlindToken"]] = relationship(
         "BlindToken", 
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    # Un usuario tiene muchos recibos de voto
     voting_receipts: Mapped[list["VotingReceipt"]] = relationship(
         "VotingReceipt", 
         back_populates="user",
