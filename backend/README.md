@@ -45,9 +45,10 @@ mv env.example .env
 # Levantar el contenedor
 docker compose up --build
 
-# Seed a la base de datos
-docker compose run seed
+# Seeding a la base de datos
+docker compose run api python seed.py
 
+# POR AHORA HACER ESTO PARA DETENER (Elimina la base de datos)
 # En caso de querer eliminar volúmenes
 docker compose down -v
 ```
