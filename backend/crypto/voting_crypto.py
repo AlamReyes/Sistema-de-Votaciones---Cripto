@@ -229,10 +229,10 @@ class VotingCrypto:
     def load_public_key_from_pem(pem_data: str):
         """
         Carga una clave pública RSA desde formato PEM
-        
+
         Args:
             pem_data: Clave pública en formato PEM
-            
+
         Returns:
             Objeto RSAPublicKey
         """
@@ -240,3 +240,125 @@ class VotingCrypto:
             pem_data.encode('utf-8'),
             backend=default_backend()
         )
+
+    # ========================================================================
+    # BLIND SIGNATURE OPERATIONS - Firma Ciega para Anonimato
+    # ========================================================================
+
+    @staticmethod
+    def generate_institution_keys() -> Tuple[str, str]:
+        """
+        Genera par de claves RSA para la institución (autoridad de votación)
+
+        Returns:
+            Tupla (private_key_pem, public_key_pem)
+        """
+        # Generar clave privada RSA de 2048 bits
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+
+        # Serializar clave privada a PEM
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode('utf-8')
+
+        # Obtener y serializar clave pública
+        public_key = private_key.public_key()
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode('utf-8')
+
+        return private_pem, public_pem
+
+    @staticmethod
+    def blind_sign(blinded_token: str, private_key_pem: str) -> str:
+        """
+        Firma un token cegado usando la clave privada de la institución.
+        Implementa el paso de firma en el esquema de firma ciega RSA.
+
+        Args:
+            blinded_token: Token cegado (hash hexadecimal) del usuario
+            private_key_pem: Clave privada de la institución en PEM
+
+        Returns:
+            Firma ciega en base64
+        """
+        # Cargar clave privada
+        private_key = VotingCrypto.load_private_key_from_pem(private_key_pem)
+
+        # Convertir token cegado a bytes
+        token_bytes = bytes.fromhex(blinded_token)
+
+        # Firmar el token cegado usando RSA-PSS
+        # En un esquema de firma ciega real, esto firmará el mensaje cegado
+        # sin que la autoridad conozca el contenido original
+        signature = private_key.sign(
+            token_bytes,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH  # AUTO solo es válido para verificación
+            ),
+            hashes.SHA256()
+        )
+
+        return base64.b64encode(signature).decode('utf-8')
+
+    @staticmethod
+    def verify_blind_signature(
+        original_data: str,
+        signature: str,
+        public_key_pem: str
+    ) -> bool:
+        """
+        Verifica una firma ciega usando la clave pública de la institución.
+
+        Args:
+            original_data: Datos originales (token sin cegar)
+            signature: Firma en base64
+            public_key_pem: Clave pública de la institución en PEM
+
+        Returns:
+            True si la firma es válida
+        """
+        try:
+            public_key = VotingCrypto.load_public_key_from_pem(public_key_pem)
+            signature_bytes = base64.b64decode(signature)
+            data_bytes = bytes.fromhex(original_data)
+
+            public_key.verify(
+                signature_bytes,
+                data_bytes,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.AUTO
+                ),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def get_public_key_from_private(private_key_pem: str) -> str:
+        """
+        Extrae la clave pública desde una clave privada PEM.
+
+        Args:
+            private_key_pem: Clave privada en formato PEM
+
+        Returns:
+            Clave pública en formato PEM
+        """
+        private_key = VotingCrypto.load_private_key_from_pem(private_key_pem)
+        public_key = private_key.public_key()
+
+        return public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode('utf-8')

@@ -21,7 +21,8 @@ export const AppLayout = ({
   title = 'Sistema de Votaciones',
   logoText = 'APP'
 }: AppLayoutProps) => {
-  const API_URL = "http://localhost:8000/api/v1";
+  //const API_URL = "http://localhost:8000/api/v1";
+  const API_URL = "/api/v1";
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },

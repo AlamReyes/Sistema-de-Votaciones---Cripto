@@ -42,13 +42,31 @@ class BlindTokenRepository(BaseRepository[BlindToken]):
     
     async def mark_as_used(self, token_id: int) -> bool:
         """Marcar token como usado"""
-        from datetime import datetime
+        from datetime import datetime, timezone
         token = await self.get(token_id)
         if not token or token.is_used:
             return False
-        
-        await self.update(token_id, is_used=True, used_at=datetime.utcnow())
+
+        await self.update(token_id, is_used=True, used_at=datetime.now(timezone.utc))
         return True
+
+    async def get_pending_tokens(self, election_id: Optional[int] = None) -> List[BlindToken]:
+        """Obtener tokens pendientes de firma (sin signed_token)"""
+        query = select(BlindToken).where(BlindToken.signed_token.is_(None))
+        if election_id:
+            query = query.where(BlindToken.election_id == election_id)
+        query = query.order_by(BlindToken.created_at.asc())
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def get_all_tokens(self, election_id: Optional[int] = None) -> List[BlindToken]:
+        """Obtener todos los tokens, opcionalmente filtrados por elección"""
+        query = select(BlindToken)
+        if election_id:
+            query = query.where(BlindToken.election_id == election_id)
+        query = query.order_by(BlindToken.created_at.desc())
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
 
 
 class VoteRepository(BaseRepository[Vote]):

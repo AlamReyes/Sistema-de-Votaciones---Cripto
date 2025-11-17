@@ -92,7 +92,7 @@ class VoteCreate(VoteBase):
     """Esquema para crear un voto anónimo"""
     unblinded_signature: str = Field(..., description="Firma descegada del token")
     vote_hash: str = Field(..., min_length=64, max_length=64, description="Hash SHA-256 del voto")
-    
+
     @field_validator('unblinded_signature')
     @classmethod
     def validate_signature(cls, v: str) -> str:
@@ -101,7 +101,7 @@ class VoteCreate(VoteBase):
         if len(v.strip()) < 10:
             raise ValueError('La firma descegada parece ser demasiado corta')
         return v.strip()
-    
+
     @field_validator('vote_hash')
     @classmethod
     def validate_vote_hash(cls, v: str) -> str:
@@ -111,12 +111,44 @@ class VoteCreate(VoteBase):
         return v.lower()
 
 
+class VoteWithReceiptCreate(VoteCreate):
+    """Esquema para crear voto Y recibo en operación atómica"""
+    user_id: int = Field(..., gt=0, description="ID del usuario que vota")
+    receipt_hash: str = Field(..., min_length=64, max_length=64, description="Hash SHA-256 del recibo")
+    receipt_signature: str = Field(..., description="Firma digital del recibo")
+
+    @field_validator('receipt_hash')
+    @classmethod
+    def validate_receipt_hash(cls, v: str) -> str:
+        if not re.match(r'^[a-fA-F0-9]{64}$', v):
+            raise ValueError('El hash del recibo debe ser SHA-256 (64 caracteres hexadecimales)')
+        return v.lower()
+
+    @field_validator('receipt_signature')
+    @classmethod
+    def validate_receipt_signature(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError('La firma del recibo no puede estar vacía')
+        return v.strip()
+
+
+class VoteWithReceiptResponse(BaseModel):
+    """Respuesta de voto atómico con recibo"""
+    vote_id: int
+    election_id: int
+    receipt_id: int
+    receipt_hash: str
+    voted_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class VoteResponse(BaseModel):
     """Esquema para respuesta de Vote (mínima información)"""
     id: int
     election_id: int
     created_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
