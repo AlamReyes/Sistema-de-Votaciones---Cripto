@@ -77,10 +77,10 @@ async def run_seed():
             # Crear elección con período de 30 días
             now = datetime.now(timezone.utc)
             election = await election_repo.create(
-                title="Elección de Representante Estudiantil 2025",
-                description="Votación para elegir al representante estudiantil del período 2025-2026. Selecciona al candidato de tu preferencia.",
+                title="Elección de Representante Estudiantil Diciembre 2025",
+                description="Votación para elegir al representante estudiantil del período 01/12/25 - 31/12/25.",
                 start_date=now,
-                end_date=now + timedelta(days=30),
+                end_date=now + timedelta(days=10),
                 is_active=True,
                 blind_signature_key=blind_signature_key
             )
@@ -90,7 +90,6 @@ async def run_seed():
                 ("María García López", 1),
                 ("Carlos Rodríguez Sánchez", 2),
                 ("Ana Martínez Pérez", 3),
-                ("Voto en Blanco", 4),
             ]
 
             for candidate_name, order in candidates:

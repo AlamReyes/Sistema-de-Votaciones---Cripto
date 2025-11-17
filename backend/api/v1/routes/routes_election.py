@@ -19,6 +19,7 @@ from api.v1.schemas.election import (
 )
 from db.session import get_db
 from services.election_service import ElectionService
+from crypto.voting_crypto import VotingCrypto
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/elections", tags=["Elections"])
@@ -115,6 +116,14 @@ async def create_election(
     current_user: User = Depends(get_current_admin),
 ):
     """Create a new election with options (admin only)"""
+    # Auto-generate blind signature key if not provided
+    blind_signature_key = data.blind_signature_key
+    if not blind_signature_key:
+        # Generate RSA key pair for the institution
+        private_key_pem, public_key_pem = VotingCrypto.generate_institution_keys()
+        blind_signature_key = private_key_pem
+        # Note: public_key_pem can be stored separately or derived from private key when needed
+
     # Create election
     election = Election(
         title=data.title,
@@ -122,7 +131,7 @@ async def create_election(
         start_date=data.start_date,
         end_date=data.end_date,
         is_active=data.is_active,
-        blind_signature_key=data.blind_signature_key,
+        blind_signature_key=blind_signature_key,
     )
     db.add(election)
     await db.flush()  # Get the election ID
@@ -265,3 +274,76 @@ async def get_election_results(
         total_votes=total_votes,
         options=options_with_counts,
     )
+
+
+@router.get("/{election_id}/public-key")
+async def get_election_public_key(
+    election_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin),
+):
+    """Get the institution's public key for an election (admin only)"""
+    result = await db.execute(select(Election).where(Election.id == election_id))
+    election = result.scalar_one_or_none()
+
+    if not election:
+        raise HTTPException(status_code=404, detail="Election not found")
+
+    try:
+        # Extract public key from stored private key
+        public_key_pem = VotingCrypto.get_public_key_from_private(
+            election.blind_signature_key
+        )
+        return {
+            "election_id": election.id,
+            "election_title": election.title,
+            "public_key": public_key_pem,
+            "key_type": "RSA-2048",
+            "purpose": "Blind signature verification for anonymous voting"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error extracting public key: {str(e)}"
+        )
+
+
+@router.put("/{election_id}/regenerate-key")
+async def regenerate_election_key(
+    election_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin),
+):
+    """
+    Regenerate RSA key pair for an election (admin only).
+    Use this for elections created before automatic key generation.
+    WARNING: This will invalidate any existing unsigned tokens.
+    """
+    result = await db.execute(select(Election).where(Election.id == election_id))
+    election = result.scalar_one_or_none()
+
+    if not election:
+        raise HTTPException(status_code=404, detail="Election not found")
+
+    # Check if election already has valid key
+    has_valid_key = (
+        election.blind_signature_key
+        and election.blind_signature_key.startswith("-----BEGIN")
+    )
+
+    # Generate new RSA key pair
+    private_key_pem, public_key_pem = VotingCrypto.generate_institution_keys()
+
+    # Update election with new key
+    election.blind_signature_key = private_key_pem
+    await db.commit()
+    await db.refresh(election)
+
+    return {
+        "election_id": election.id,
+        "election_title": election.title,
+        "message": "RSA key pair regenerated successfully",
+        "had_valid_key_before": has_valid_key,
+        "public_key": public_key_pem,
+        "warning": "Any existing unsigned tokens will need to be recreated"
+    }

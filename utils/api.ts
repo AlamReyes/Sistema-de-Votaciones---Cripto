@@ -55,6 +55,14 @@ export interface VoteResponse {
   created_at: string;
 }
 
+export interface VoteWithReceiptResponse {
+  vote_id: number;
+  election_id: number;
+  receipt_id: number;
+  receipt_hash: string;
+  voted_at: string;
+}
+
 export interface VotingReceiptResponse {
   id: number;
   user_id: number;
@@ -148,6 +156,23 @@ export async function getMyBlindToken(
   return fetchAPI<BlindTokenResponse>(`/voting/blind-tokens/me/${electionId}`);
 }
 
+export async function castVoteWithReceipt(data: {
+  user_id: number;
+  election_id: number;
+  option_id: number;
+  unblinded_signature: string;
+  vote_hash: string;
+  encrypted_vote: string;
+  receipt_hash: string;
+  receipt_signature: string;
+}): Promise<VoteWithReceiptResponse> {
+  return fetchAPI<VoteWithReceiptResponse>("/voting/votes/complete", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// DEPRECATED: Use castVoteWithReceipt instead
 export async function castVote(data: {
   election_id: number;
   option_id: number;
@@ -155,22 +180,17 @@ export async function castVote(data: {
   vote_hash: string;
   encrypted_vote: string;
 }): Promise<VoteResponse> {
-  return fetchAPI<VoteResponse>("/voting/votes", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  throw new Error("DEPRECATED: Use castVoteWithReceipt for atomic vote + receipt");
 }
 
+// DEPRECATED: Use castVoteWithReceipt instead
 export async function createReceipt(data: {
   user_id: number;
   election_id: number;
   receipt_hash: string;
   digital_signature: string;
 }): Promise<VotingReceiptResponse> {
-  return fetchAPI<VotingReceiptResponse>("/voting/receipts", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  throw new Error("DEPRECATED: Use castVoteWithReceipt for atomic vote + receipt");
 }
 
 export async function getMyReceipt(
@@ -213,7 +233,7 @@ export interface ElectionCreate {
   start_date: string;
   end_date: string;
   is_active: boolean;
-  blind_signature_key: string;
+  blind_signature_key?: string; // Optional: auto-generated if not provided
   options: { option_text: string; option_order: number }[];
 }
 
@@ -291,4 +311,65 @@ export async function getElectionResults(
   electionId: number
 ): Promise<ElectionResults> {
   return fetchAPI<ElectionResults>(`/elections/${electionId}/results`);
+}
+
+export interface RegenerateKeyResponse {
+  election_id: number;
+  election_title: string;
+  message: string;
+  had_valid_key_before: boolean;
+  public_key: string;
+  warning: string;
+}
+
+export async function regenerateElectionKey(
+  electionId: number
+): Promise<RegenerateKeyResponse> {
+  return fetchAPI<RegenerateKeyResponse>(`/elections/${electionId}/regenerate-key`, {
+    method: "PUT",
+  });
+}
+
+export async function getElectionPublicKey(
+  electionId: number
+): Promise<{ election_id: number; public_key: string; key_type: string }> {
+  return fetchAPI(`/elections/${electionId}/public-key`);
+}
+
+// Blind Token Management (Admin) - Audit Only
+// Note: Tokens are now signed automatically, these functions are for auditing
+
+// DEPRECATED: Tokens are now auto-signed. This will usually return empty array.
+export async function getPendingBlindTokens(
+  electionId?: number
+): Promise<BlindTokenResponse[]> {
+  console.warn("getPendingBlindTokens is deprecated - tokens are now auto-signed");
+  const url = electionId
+    ? `/voting/blind-tokens/pending?election_id=${electionId}`
+    : "/voting/blind-tokens/pending";
+  return fetchAPI<BlindTokenResponse[]>(url);
+}
+
+export async function getAllBlindTokens(
+  electionId?: number
+): Promise<BlindTokenResponse[]> {
+  const url = electionId
+    ? `/voting/blind-tokens/all?election_id=${electionId}`
+    : "/voting/blind-tokens/all";
+  return fetchAPI<BlindTokenResponse[]>(url);
+}
+
+// DEPRECATED: Tokens are now auto-signed at creation time
+export async function signBlindToken(
+  tokenId: number,
+  signedToken: string
+): Promise<BlindTokenResponse> {
+  console.warn("signBlindToken is deprecated - tokens are now auto-signed");
+  return fetchAPI<BlindTokenResponse>(`/voting/blind-tokens/${tokenId}/sign`, {
+    method: "PUT",
+    body: JSON.stringify({
+      blind_token_id: tokenId,
+      signed_token: signedToken,
+    }),
+  });
 }

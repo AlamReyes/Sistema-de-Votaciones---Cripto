@@ -210,36 +210,6 @@ export default function AdminResultadosPage() {
             </Row>
           </Card>
 
-          {winners && winners.length > 0 && results.total_votes > 0 && (
-            <Card
-              style={{
-                marginBottom: "24px",
-                background: "linear-gradient(135deg, #ffd700 0%, #ffed4a 100%)",
-              }}
-            >
-              <Row align="middle" justify="center">
-                <Col>
-                  <Space direction="vertical" align="center">
-                    <TrophyOutlined style={{ fontSize: "48px", color: "#b8860b" }} />
-                    <Title level={3} style={{ margin: 0, color: "#5c4d0b" }}>
-                      {winners.length > 1 ? "Empate" : "Ganador"}
-                    </Title>
-                    <Space>
-                      {winners.map((w) => (
-                        <Tag key={w.id} color="gold" style={{ fontSize: "16px", padding: "8px 16px" }}>
-                          {w.option_text}
-                        </Tag>
-                      ))}
-                    </Space>
-                    <Text style={{ color: "#5c4d0b" }}>
-                      {winners[0].vote_count} votos ({getPercentage(winners[0].vote_count)}%)
-                    </Text>
-                  </Space>
-                </Col>
-              </Row>
-            </Card>
-          )}
-
           <Card title="Desglose de Votos">
             {results.total_votes === 0 ? (
               <Empty description="No hay votos registrados aún" />
@@ -259,9 +229,6 @@ export default function AdminResultadosPage() {
                               <Text strong style={{ fontSize: "16px" }}>
                                 {index + 1}. {option.option_text}
                               </Text>
-                              {isWinner && (
-                                <TrophyOutlined style={{ color: "#faad14" }} />
-                              )}
                             </Space>
                           </Col>
                           <Col>
@@ -275,8 +242,8 @@ export default function AdminResultadosPage() {
                           strokeColor={
                             isWinner
                               ? {
-                                  from: "#ffd700",
-                                  to: "#faad14",
+                                  from: "#6a0dad",
+                                  to: "#1e90ff",
                                 }
                               : undefined
                           }

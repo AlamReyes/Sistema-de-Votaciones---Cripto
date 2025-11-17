@@ -26,6 +26,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   MinusCircleOutlined,
+  KeyOutlined,
 } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import dayjs from "dayjs";
@@ -34,6 +35,7 @@ import {
   createElection,
   deleteElection,
   toggleElectionActive,
+  regenerateElectionKey,
   Election,
   ElectionCreate,
 } from "@/utils/api";
@@ -75,7 +77,7 @@ export default function AdminVotacionesPage() {
         start_date: values.dates[0].toISOString(),
         end_date: values.dates[1].toISOString(),
         is_active: values.is_active,
-        blind_signature_key: values.blind_signature_key,
+        blind_signature_key: values.blind_signature_key || "", // Empty string will trigger auto-generation
         options: values.options.map((opt: string, index: number) => ({
           option_text: opt,
           option_order: index + 1,
@@ -84,7 +86,7 @@ export default function AdminVotacionesPage() {
 
       const newElection = await createElection(electionData);
       setElections([newElection, ...elections]);
-      message.success("Elección creada correctamente");
+      message.success("Elección creada con llave RSA generada automáticamente");
       setModalVisible(false);
       form.resetFields();
     } catch (error: any) {
@@ -121,6 +123,22 @@ export default function AdminVotacionesPage() {
       );
     } catch (error: any) {
       message.error(error.message || "Error al cambiar estado");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRegenerateKey = async (electionId: number) => {
+    try {
+      setActionLoading(electionId);
+      const result = await regenerateElectionKey(electionId);
+      message.success(
+        `Llave RSA regenerada para "${result.election_title}". ${result.warning}`
+      );
+      // Reload elections to get updated data
+      await loadElections();
+    } catch (error: any) {
+      message.error(error.message || "Error al regenerar llave RSA");
     } finally {
       setActionLoading(null);
     }
@@ -206,6 +224,21 @@ export default function AdminVotacionesPage() {
       key: "actions",
       render: (_: any, record: Election) => (
         <Space>
+          <Popconfirm
+            title="Regenerar Llave RSA"
+            description="¿Regenerar la llave RSA de esta elección? Los tokens sin firmar necesitarán ser recreados."
+            onConfirm={() => handleRegenerateKey(record.id)}
+            okText="Sí, regenerar"
+            cancelText="Cancelar"
+          >
+            <Button
+              size="small"
+              icon={<KeyOutlined />}
+              loading={actionLoading === record.id}
+            >
+              Regenerar Llave
+            </Button>
+          </Popconfirm>
           <Popconfirm
             title="Eliminar elección"
             description="¿Estás seguro? Se eliminarán todos los votos y tokens asociados."
@@ -396,16 +429,16 @@ export default function AdminVotacionesPage() {
             )}
           </Form.List>
 
-          <Divider>Clave de Firma Ciega (RSA)</Divider>
+          <Divider>Clave de Firma Ciega (RSA) - Opcional</Divider>
 
           <Form.Item
             label="Clave Privada RSA (formato PEM)"
             name="blind_signature_key"
+            extra="Deja vacío para generar automáticamente una llave RSA-2048 segura para la institución"
             rules={[
-              { required: true, message: "La clave RSA es requerida" },
               {
                 validator: (_, value) => {
-                  if (value && !value.includes("-----BEGIN")) {
+                  if (value && value.trim() && !value.includes("-----BEGIN")) {
                     return Promise.reject("Debe ser formato PEM válido");
                   }
                   return Promise.resolve();
@@ -414,8 +447,8 @@ export default function AdminVotacionesPage() {
             ]}
           >
             <TextArea
-              rows={6}
-              placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"
+              rows={4}
+              placeholder="Opcional: Se generará automáticamente si se deja vacío"
               style={{ fontFamily: "monospace" }}
             />
           </Form.Item>
