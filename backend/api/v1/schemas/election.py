@@ -94,41 +94,47 @@ class ElectionBase(BaseModel):
 
 class ElectionCreate(ElectionBase):
     """Esquema para crear una elección"""
-    blind_signature_key: str = Field(..., description="Clave privada RSA para firma ciega (formato PEM)")
+    blind_signature_key: Optional[str] = Field(
+        None,
+        description="Clave privada RSA para firma ciega (formato PEM). Si no se proporciona, se genera automáticamente."
+    )
     options: list[OptionCreate] = Field(..., min_length=2, description="Lista de opciones (mínimo 2)")
-    
+
     @field_validator('blind_signature_key')
     @classmethod
-    def validate_signature_key(cls, v: str) -> str:
-        """Valida formato básico de clave privada PEM"""
+    def validate_signature_key(cls, v: Optional[str]) -> Optional[str]:
+        """Valida formato básico de clave privada PEM si se proporciona"""
+        if v is None:
+            return v  # Se generará automáticamente
+
         if not v.strip():
-            raise ValueError('La clave de firma ciega no puede estar vacía')
-        
+            return None  # Tratar string vacío como no proporcionado
+
         v = v.strip()
         if not v.startswith('-----BEGIN'):
             raise ValueError('La clave debe estar en formato PEM')
         if not v.endswith('-----'):
             raise ValueError('Formato PEM inválido')
-        
+
         return v
-    
+
     @field_validator('options')
     @classmethod
     def validate_options(cls, v: list[OptionCreate]) -> list[OptionCreate]:
         """Valida que haya al menos 2 opciones y que no se repitan textos"""
         if len(v) < 2:
             raise ValueError('Una elección debe tener al menos 2 opciones')
-        
+
         # Verificar que no haya textos duplicados
         texts = [opt.option_text.lower().strip() for opt in v]
         if len(texts) != len(set(texts)):
             raise ValueError('No puede haber opciones con el mismo texto')
-        
+
         # Verificar que los órdenes no se repitan
         orders = [opt.option_order for opt in v]
         if len(orders) != len(set(orders)):
             raise ValueError('No puede haber opciones con el mismo orden')
-        
+
         return v
 
 

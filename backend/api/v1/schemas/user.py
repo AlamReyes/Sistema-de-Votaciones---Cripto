@@ -52,8 +52,8 @@ class UserResponse(UserBase):
 
 class UserWithPublicKey(UserResponse):
     """Esquema que incluye la clave pública (para casos específicos)"""
-    public_key: str
-    
+    public_key: Optional[str] = None
+
     model_config = ConfigDict(from_attributes=True)
 
 class UserList(BaseModel):

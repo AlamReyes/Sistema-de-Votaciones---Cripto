@@ -65,8 +65,8 @@ async def refresh_token(
     if payload is None or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    user_id = payload["sub"]
-    user = await repo.get_user_by_id(user_id) 
+    user_id = int(payload["sub"])  # Convertir string a int
+    user = await repo.get_by_id(user_id)  # Método correcto del repositorio
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

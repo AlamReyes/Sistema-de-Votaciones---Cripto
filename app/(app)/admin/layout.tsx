@@ -4,6 +4,7 @@ import {
   SafetyOutlined,
   BarChartOutlined,
   UserOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -17,6 +18,11 @@ const adminMenuItems: MenuProps['items'] = [
     key: '/admin/votaciones',
     icon: <SafetyOutlined />,
     label: 'Votaciones',
+  },
+  {
+    key: '/admin/tokens',
+    icon: <KeyOutlined />,
+    label: 'Auditoría Tokens',
   },
   {
     key: '/admin/resultados',
