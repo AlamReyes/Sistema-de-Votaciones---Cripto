@@ -42,12 +42,12 @@ class BlindTokenRepository(BaseRepository[BlindToken]):
     
     async def mark_as_used(self, token_id: int) -> bool:
         """Marcar token como usado"""
-        from datetime import datetime
+        from datetime import datetime, timezone
         token = await self.get(token_id)
         if not token or token.is_used:
             return False
-        
-        await self.update(token_id, is_used=True, used_at=datetime.utcnow())
+
+        await self.update(token_id, is_used=True, used_at=datetime.now(timezone.utc))
         return True
 
 

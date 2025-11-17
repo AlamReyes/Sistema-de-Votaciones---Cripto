@@ -101,7 +101,7 @@ class UserService:
     # ------------------------
     async def delete_user(self, user_id: int) -> bool:
         # Verificar si existe el usuario
-        user = self.repo.get_by_id(user_id)
+        user = await self.repo.get_by_id(user_id)
         if not user:
             return False
         # Eliminar al usuario

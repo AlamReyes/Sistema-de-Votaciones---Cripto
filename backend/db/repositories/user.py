@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func
 from db.models.user import User
 from sqlalchemy.future import select
 from api.v1.schemas.user import UserCreate, UserUpdate, UserUpdatePublicKey
@@ -40,10 +41,14 @@ class UserRepository:
         return result.scalar_one_or_none()
 
     async def list_users(self, skip: int = 0, limit: int = 10) -> List[User]:
-        return await self.db.query(User).offset(skip).limit(limit).all()
+        result = await self.db.execute(
+            select(User).offset(skip).limit(limit).order_by(User.id)
+        )
+        return list(result.scalars().all())
 
     async def count_users(self) -> int:
-        return await self.db.query(User).count()
+        result = await self.db.execute(select(func.count(User.id)))
+        return result.scalar_one()
 
     # ------------------------
     # UPDATE

@@ -24,8 +24,8 @@ class Election(Base):
     
     # Clave de la autoridad para firma ciega
     blind_signature_key: Mapped[str] = mapped_column(Text, nullable=False)
-    
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     
     # Relaciones
     # Una elección tiene muchas opciones

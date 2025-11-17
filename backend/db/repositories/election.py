@@ -2,7 +2,7 @@ from typing import List, Optional
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from datetime import datetime
+from datetime import datetime, timezone
 from db.models.election import Election, Option
 from db.repositories.base import BaseRepository
 
@@ -21,7 +21,7 @@ class ElectionRepository(BaseRepository[Election]):
     
     async def get_active_elections(self) -> List[Election]:
         """Obtener elecciones activas"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         result = await self.db.execute(
             select(Election)
             .options(selectinload(Election.options))
