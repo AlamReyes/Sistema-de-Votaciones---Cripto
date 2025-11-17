@@ -12,7 +12,7 @@ const { Title, Text, Link } = Typography;
 export default function Home() {
   const router = useRouter();
   const [view, setView] = useState("login");
-  const API_URL = "http://localhost:8000/api/v1";
+  const API_URL = "/api/v1";
 
   // -------------------------
   // LOGIN
