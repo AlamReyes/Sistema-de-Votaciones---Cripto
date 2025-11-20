@@ -80,5 +80,5 @@ class UserRepository:
     # DELETE
     # ------------------------
     async def delete(self, user: User) -> None:
-        self.db.delete(user) # Solo lo marca como pendiente para ser eliminado
+        await self.db.delete(user) # Solo lo marca como pendiente para ser eliminado
         await self.db.commit()

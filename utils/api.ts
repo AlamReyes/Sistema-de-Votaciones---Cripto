@@ -90,6 +90,11 @@ export async function fetchAPI<T>(
     throw new Error(error.detail || `Error ${res.status}`);
   }
 
+  // Si no hay contenido, devolver undefined
+  if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+    return undefined as unknown as T;
+  }
+
   return res.json();
 }
 
