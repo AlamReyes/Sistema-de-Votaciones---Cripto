@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.v1.schemas.user import UserCreate, UserUpdate, UserUpdatePublicKey
@@ -64,6 +65,14 @@ class UserService:
         """
         Actualiza un usuario. No maneja cambios de admin.
         """
+        # Obtener el usuario por username para validar que no exista
+        user_exists = await self.repo.get_by_username(data.username)
+        if user_exists and user_exists.id != user_id:
+            raise HTTPException(
+                status_code=400,
+                detail="El nombre de usuario ya está en uso"
+            )
+
         # Obtiene el usuario por id
         user = await self.repo.get_by_id(user_id)
         if not user:

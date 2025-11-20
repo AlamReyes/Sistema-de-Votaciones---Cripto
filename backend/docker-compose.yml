@@ -42,6 +42,5 @@ services:
       - api  # Se asegura de iniciar después de la API
     restart: unless-stopped
     
-
 volumes:
   pgdata:
