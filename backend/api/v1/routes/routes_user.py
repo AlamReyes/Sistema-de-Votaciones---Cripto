@@ -123,9 +123,7 @@ async def set_admin(
 async def delete_user(
     user_id: int,
     service: UserService = Depends(get_user_service),
-    current_user: User = Depends(get_current_user),  # PROTEGIDO
+    current_user: User = Depends(get_current_user),
 ):
-    deleted = await service.delete_user(user_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="User not found")
+    await service.delete_user(user_id)
     return None
