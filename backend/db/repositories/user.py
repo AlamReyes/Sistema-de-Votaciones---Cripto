@@ -54,8 +54,10 @@ class UserRepository:
     # UPDATE
     # ------------------------
     async def update(self, user: User, data: UserUpdate) -> User:
-        for field, value in data.dict(exclude_unset=True).items():
+        update_data = data.model_dump(exclude_unset=True)
+        for field, value in update_data.items(): # actualizar solo datos enviados
             setattr(user, field, value)
+        self.session.add(user)
         await self.db.commit()
         await self.db.refresh(user)
         return user

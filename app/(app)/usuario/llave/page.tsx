@@ -145,8 +145,7 @@ export default function UserLlavePage() {
         <div>
           <p>
             Al guardar tu llave pública, esta se registrará en el servidor y se
-            usará para verificar tus votos.Asegúrate de haber descargado y guardado 
-            tu llave privada en un lugar seguro. NO la pierdas, ya que la necesitarás para votar.
+            usará para verificar tus votos.
           </p>
           <Alert
             message="Importante"
@@ -165,6 +164,7 @@ export default function UserLlavePage() {
           const updatedUser = await updatePublicKey(user.id, publicKey);
           setUser(updatedUser);
           setCurrentStep(3);
+          setShowKeys(false)
           message.success("Llave pública guardada correctamente");
         } catch (error: any) {
           message.error(error.message || "Error al guardar la llave pública");
@@ -273,7 +273,7 @@ export default function UserLlavePage() {
                   setCurrentStep(0);
                 }}
               >
-                Ver/Generar Nuevas Llaves
+                Generar Nuevas Llaves
               </Button>
             </Space>
           </div>
@@ -340,7 +340,7 @@ export default function UserLlavePage() {
                 <Alert
                   message="¡IMPORTANTE!"
                   description="Se ha generado tu llave privada. Descárgala y guárdala en un lugar seguro. NO la compartas con nadie."
-                  type="error"
+                  type="info"
                   showIcon
                   style={{ marginBottom: 12 }}
                 />

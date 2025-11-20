@@ -230,6 +230,7 @@ export default function AdminVotacionesPage() {
             onConfirm={() => handleRegenerateKey(record.id)}
             okText="Sí, regenerar"
             cancelText="Cancelar"
+            overlayStyle={{ width: 240 }}
           >
             <Button
               size="small"
@@ -246,6 +247,7 @@ export default function AdminVotacionesPage() {
             okText="Sí, eliminar"
             cancelText="Cancelar"
             okButtonProps={{ danger: true }}
+            overlayStyle={{ width: 240 }}
           >
             <Button
               size="small"
@@ -383,14 +385,14 @@ export default function AdminVotacionesPage() {
           >
             {(fields, { add, remove }, { errors }) => (
               <>
-                {fields.map((field, index) => (
+                {fields.map(({ key, ...restField }, index) => (
                   <Form.Item
                     required={false}
-                    key={field.key}
+                    key={key}
                     label={index === 0 ? "Opciones" : ""}
                   >
                     <Form.Item
-                      {...field}
+                      {...restField}
                       validateTrigger={["onChange", "onBlur"]}
                       rules={[
                         {
@@ -401,17 +403,19 @@ export default function AdminVotacionesPage() {
                       ]}
                       noStyle
                     >
-                      <Input
-                        placeholder={`Opción ${index + 1}`}
-                        style={{ width: "90%" }}
-                      />
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <Input
+                          placeholder={`Opción ${index + 1}`}
+                          style={{ width: "100%" }}
+                        />
+                        {fields.length > 2 && (
+                          <MinusCircleOutlined
+                            style={{ marginLeft: 8, color: "#ff4d4f" }}
+                            onClick={() => remove(restField.name)}
+                          />
+                        )}
+                      </div>
                     </Form.Item>
-                    {fields.length > 2 && (
-                      <MinusCircleOutlined
-                        style={{ marginLeft: 8, color: "#ff4d4f" }}
-                        onClick={() => remove(field.name)}
-                      />
-                    )}
                   </Form.Item>
                 ))}
                 <Form.Item>

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import Optional
 
@@ -20,8 +20,6 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=1, max_length=50)
     username: Optional[str] = Field(None, min_length=3, max_length=50)
     password: Optional[str] = Field(None, min_length=8, max_length=128)
-    public_key: Optional[str] = None
-    is_admin: Optional[bool] = None
 
 class UserUpdateIsAdmin(BaseModel):
     """Esquema exclusivo para actualizar el atributo is_admin"""

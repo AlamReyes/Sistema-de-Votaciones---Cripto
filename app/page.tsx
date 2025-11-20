@@ -36,15 +36,12 @@ export default function Home() {
 
       const data = await res.json();
       message.success("Inicio de sesión exitoso");
-      // Guardar tokens
-      /* localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
- */
+    
       // Redirigiar con base a su valor en is_admin
       if (data.is_admin) {
-        router.push("/admin");
+        router.push("/admin/dashboard");
       } else {
-        router.push("/usuario");
+        router.push("/usuario/votacion");
       }
 
     } catch (err) {
