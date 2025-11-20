@@ -66,7 +66,10 @@ export default function AdminDashboardPage() {
     try {
       setActionLoading(userId);
       const updatedUser = await setUserAdmin(userId, !currentIsAdmin);
-      setUsers(users.map((u) => (u.id === userId ? updatedUser : u)));
+      setUsers(users.map((u) => 
+        // ...u copia lo del usuario anterior y ...updateUser toca solo los campos actualizados, se hace un merge de info
+        u.id === userId ? { ...u, ...updatedUser } : u // Evitar el borrado de la demás info
+      ));
       message.success(
         `Usuario ${!currentIsAdmin ? "promovido a" : "removido de"} administrador`
       );

@@ -54,6 +54,9 @@ Sistema-de-Votaciones---Cripto/
 |   |   |-- repositories/    # Capa que habla directamente con la base de datos, queries, CRUD, etc.
 |   |
 │   ├── core/                # Configuración global, variables de entorno, seguridad, etc.
+|   |-- nginx/               # Configuración del proxy inverso con HTTPS
+|   |   |-- ssl/             # Certificados SSL
+|   |
 │   ├── services/            # Lógica de negocio, validaciones, coherencia y uso de endpoints
 │   ├── requirements.txt     # Dependencias de Python
 │   └── __init__.py

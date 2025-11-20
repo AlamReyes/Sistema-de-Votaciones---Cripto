@@ -45,7 +45,7 @@ export default function AdminLayout({
     <AppLayout 
       menuItems={adminMenuItems}
       title="Sistema de Votaciones - Administrador"
-      logoText="ADMIN"
+      logoText="ADMINISTRADOR"
     >
       {children}
     </AppLayout>

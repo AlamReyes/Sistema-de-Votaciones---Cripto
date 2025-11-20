@@ -8,14 +8,14 @@ import type { MenuProps } from 'antd';
 
 const usuarioMenuItems: MenuProps['items'] = [
   {
-    key: '/usuario/llave',
-    icon: <KeyOutlined />,
-    label: 'Mi Llave Privada',
-  },
-  {
     key: '/usuario/votacion',
     icon: <SafetyOutlined />,
     label: 'Votar',
+  },
+  {
+    key: '/usuario/llave',
+    icon: <KeyOutlined />,
+    label: 'Mi Llave Privada'
   },
   {
     key: '/usuario/perfil',

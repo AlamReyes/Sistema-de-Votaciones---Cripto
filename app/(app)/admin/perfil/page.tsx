@@ -15,7 +15,6 @@ import {
   Tag,
 } from "antd";
 import {
-  UserOutlined,
   EditOutlined,
   SaveOutlined,
   CloseOutlined,
@@ -24,7 +23,7 @@ import {
 import "@ant-design/v5-patch-for-react-19";
 import { getCurrentUser, updateUser, User } from "@/utils/api";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function AdminPerfilPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -37,16 +36,22 @@ export default function AdminPerfilPage() {
     loadUser();
   }, []);
 
+   useEffect(() => {
+    if(editing && user){ // Evitar el warning de Instance created by useForm is not connected...
+      form.setFieldsValue({
+        name: user.name,
+        last_name: user.last_name,
+        username: user.username
+      })
+    }
+  }, [editing, user]);
+
+  // Load user data
   const loadUser = async () => {
     try {
       setLoading(true);
       const userData = await getCurrentUser();
       setUser(userData);
-      form.setFieldsValue({
-        name: userData.name,
-        last_name: userData.last_name,
-        username: userData.username,
-      });
     } catch (error: any) {
       message.error(error.message || "Error al cargar el perfil");
     } finally {
@@ -64,7 +69,10 @@ export default function AdminPerfilPage() {
         last_name: values.last_name,
         username: values.username,
       });
-      setUser(updatedUser);
+      setUser((prev) => ({
+        ...prev,
+        ...updatedUser
+      }));
       setEditing(false);
       message.success("Perfil actualizado correctamente");
     } catch (error: any) {
